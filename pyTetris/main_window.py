@@ -3,14 +3,12 @@ import time
 from itertools import count
 from pathlib import Path
 from PyQt5 import uic, QtCore
-from PyQt5.QtCore import QTimer, pyqtSignal
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QMessageBox
-from pyTetris.tetris import Field, cls, Action
+from pyTetris.game import Game
 
 
 class MainWindow(QMainWindow):
-    soft_dropped = pyqtSignal()
-
     def __init__(self, field_height, field_width, parent=None):
         super(MainWindow, self).__init__(parent)
         uic.loadUi(Path(__file__).parent / "ui" / "main_window.ui", self)
@@ -20,7 +18,8 @@ class MainWindow(QMainWindow):
         )
 
         # Connections
-        self.actionAbout_Qt.triggered.connect(self._on_about_qt)
+        self.actionAbout_Qt.triggered.connect(self.on_about_qt)
+        self.action_Controls.triggered.connect(self.on_controls_dialog)
 
         for h in range(field_height):
             for w in range(field_width):
@@ -28,117 +27,74 @@ class MainWindow(QMainWindow):
                 button.setFocusPolicy(QtCore.Qt.NoFocus)
                 button.setFixedSize(20, 20)
                 button.setEnabled(False)
+                button.setStyleSheet(self.default_cell_stylesheet)
                 self.gridLayout_field.addWidget(button, h, w)
 
-        self._playing_time_in_seconds = 0
-        self._playing_time_in_seconds = 0
-        self._pause = False
-        self._game_over = False
+        self.game_timer = QTimer()
+        self.game_timer.setInterval(1000)
+        self.game_timer.timeout.connect(self.update_game_time)
+
+        self.tetris = None
+        self.playing_time_in_seconds = 0
+        self.playing_time_in_seconds = 0
+        self.game_over = False
         self.timer = QTimer(self.parent())
         self.timer.timeout.connect(
-            functools.partial(self._start_game, field_height, field_width, self)
+            functools.partial(self.start_game, field_height, field_width, self)
         )
 
         self.setFixedSize(self.sizeHint())
 
-        self.keyPressEvent = self.keyPressEvent
-
     def closeEvent(self, event):
-        self._field._is_running = False
+        self.tetris.is_running = False
         event.accept()
 
     def keyPressEvent(self, e):
-        if self._game_over:
+        if not self.tetris.is_running:
             return
 
-        if not self._field._is_dropping:
-            if (
-                e.key() == QtCore.Qt.Key_Left or e.key() == QtCore.Qt.Key_A
-            ) and not self._pause:
-                self._move_left()
-            elif (
-                e.key() == QtCore.Qt.Key_Right or e.key() == QtCore.Qt.Key_D
-            ) and not self._pause:
-                self._move_right()
-            elif (
-                e.key() == QtCore.Qt.Key_Down or e.key() == QtCore.Qt.Key_S
-            ) and not self._pause:
-                self._move_down()
-                self.soft_dropped.emit()
-            elif e.key() == QtCore.Qt.Key_X and not self._pause:
-                self._rotate_clockwise()
-            elif e.key() == QtCore.Qt.Key_Y and not self._pause:
-                self._rotate_counterclockwise()
-            elif e.key() == QtCore.Qt.Key_Space and not self._pause:
-                self._drop()
-            elif e.key() == QtCore.Qt.Key_P:
-                self._pause_game()
+        self.tetris.handle_input(e.key())
 
-    def _on_about_qt(self):
+    def on_about_qt(self):
         QMessageBox.aboutQt(self)
 
-    def _start_game(self, field_height, field_width, main_window):
+    def on_controls_dialog(self):
+        QMessageBox.about(
+            self,
+            "Controls",
+            """<table style="margin: 6px 18px 6px 12px;"><tr><td>Pause:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>P</b></td></tr>
+<tr><td>Left:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>←, A</b></td></tr>
+<tr><td>Right:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>→, D</b></td></tr>
+<tr><td>Soft Drop:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>↓, S</b></td></tr>
+<tr><td>Hard Drop:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>SPACE</b></td></tr>
+<tr><td>Rotate Right:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>J</b></td></tr>
+<tr><td>Rotate Left:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>K</b></td></tr></table>""",
+        )
+
+    def start_game(self, field_height, field_width, main_window):
         self.timer.stop()
-        self._field = Field(field_height, field_width, main_window)
+        self.tetris = Game(field_height, field_width, main_window)
 
-        game_timer = QTimer()
-        game_timer.setInterval(1000)
-        game_timer.timeout.connect(self._update_game_time)
-        game_timer.start()
+        self.game_timer.start()
+        self.tetris.is_running = True
 
-        while self._field.running():
-            if not self._pause:
-                print(self._field)
-                if not game_timer.isActive():
-                    game_timer.start()
-            else:
-                game_timer.stop()
-
+        while self.tetris.running():
             QApplication.processEvents()
 
-        game_timer.stop()
-        self._game_over = True
-        self._game_over_animation()
+        self.game_timer.stop()
 
-        cls()
-        print("Game over")
+        self.tetris.is_running = False
+        self.game_over_animation()
 
-    def _pause_game(self):
-        self._pause = not self._pause
-        self._field.pause_game(self._pause)
-
-        if self._pause:
-            self._write_pause()
-        else:
-            self._clear_pause_label()
-
-    def _move_left(self):
-        self._field._move(Action.LEFT)
-
-    def _move_right(self):
-        self._field._move(Action.RIGHT)
-
-    def _move_down(self):
-        self._field._move_timer.stop()
-        self._field._move(Action.DOWN)
-        self._field._move_timer.setInterval(self._field.calculate_move_speed())
-        self._field._move_timer.start()
-
-    def _drop(self):
-        self._field._move_timer.stop()
-        self._field._move(Action.DROP)
-        self._field._move_timer.setInterval(self._field.calculate_move_speed())
-        self._field._move_timer.start()
-
-    def _game_over_animation(self):
+    def game_over_animation(self):
         speed = 0.005
 
         # fill
-        for h in reversed(range(self._field._height - 1)):
+        for h in reversed(range(self.tetris.height - 1)):
             if h % 2 == 1:
-                _range = range(1, self._field._width - 1)
+                _range = range(1, self.tetris.width - 1)
             else:
-                _range = reversed(range(1, self._field._width - 1))
+                _range = reversed(range(1, self.tetris.width - 1))
 
             for w in _range:
                 button = self.gridLayout_field.itemAtPosition(h, w).widget()
@@ -149,11 +105,11 @@ class MainWindow(QMainWindow):
             QApplication.processEvents()
 
         # empty
-        for h in range(self._field._height - 1):
+        for h in range(self.tetris.height - 1):
             if h % 2 == 1:
-                _range = range(1, self._field._width - 1)
+                _range = range(1, self.tetris.width - 1)
             else:
-                _range = reversed(range(1, self._field._width - 1))
+                _range = reversed(range(1, self.tetris.width - 1))
 
             for w in _range:
                 button = self.gridLayout_field.itemAtPosition(h, w).widget()
@@ -162,31 +118,31 @@ class MainWindow(QMainWindow):
 
             QApplication.processEvents()
 
-        self._write_game_over()
+        self.write_game_over()
 
-    def _write_game_over(self):
+    def write_game_over(self):
         font_style = (
             "font-size: 10pt; font-weight: bold; background-color: black; border: 0px;"
         )
 
-        for row, word in zip([3, 4], ["GAME", "OVER"]):
+        for row, word in zip([2, 3], ["GAME", "OVER"]):
             for column, letter in zip(count(4), word):
-                # ranges = [(25, 220), (50, 180), (25, 220)]
-                # rgb = ", ".join(str(random.randint(min, max)) for min, max in ranges)
                 rgb = "255, 255, 255"
                 button = self.gridLayout_field.itemAtPosition(row, column).widget()
                 button.setText(letter)
                 button.setStyleSheet(f"{font_style} color: rgb({rgb});")
 
-                # effect = QGraphicsDropShadowEffect()
-                # effect.setBlurRadius(3)
-                # effect.setColor(QColor.fromRgb(127, 127, 127))
-                # button.setGraphicsEffect(effect)
+    def clear_pause_label(self):
+        press_p = [" ", " P", "RE", "SS", "  P", " "]
+        for column, letter in reversed(list(zip(count(3), press_p))):
+            button = self.gridLayout_field.itemAtPosition(6, column).widget()
+            button.setText("")
+            button.setStyleSheet(
+                f"{self.default_cell_stylesheet} background-color: white;"
+            )
+            time.sleep(0.015)
+            QApplication.processEvents()
 
-                # time.sleep(0.035)
-                # QApplication.processEvents()
-
-    def _clear_pause_label(self):
         for column, letter in reversed(list(zip(count(3), "PAUSED"))):
             button = self.gridLayout_field.itemAtPosition(4, column).widget()
             button.setStyleSheet(
@@ -196,7 +152,7 @@ class MainWindow(QMainWindow):
             time.sleep(0.015)
             QApplication.processEvents()
 
-    def _write_pause(self):
+    def write_pause(self):
         font_style = (
             "font-size: 10pt; font-weight: bold; background-color: black; border: 0px;"
         )
@@ -207,24 +163,29 @@ class MainWindow(QMainWindow):
             button.setText(letter)
             button.setStyleSheet(f"{font_style} color: rgb({rgb});")
 
-            # effect = QGraphicsDropShadowEffect()
-            # effect.setBlurRadius(3)
-            # effect.setColor(QColor.fromRgb(127, 127, 127))
-            # button.setGraphicsEffect(effect)
+            time.sleep(0.015)
+            QApplication.processEvents()
+
+        press_p = [" ", " P", "RE", "SS", "  P", " "]
+        for column, letter in zip(count(3), press_p):
+            rgb = "170, 240, 60"
+            button = self.gridLayout_field.itemAtPosition(6, column).widget()
+            button.setText(letter)
+            button.setStyleSheet(f"{font_style} color: rgb({rgb}); font-size: 12pt;")
 
             time.sleep(0.015)
             QApplication.processEvents()
 
-    def _pre_clear_animation(self, rows):
+    def pre_clear_animation(self, rows):
         speed = 0.025 - len(rows) * (0.01 / 4.0)
 
         for h in rows:
             if h % 2 == 1:
-                _range = range(1, self._field._width - 1)
+                range_ = range(1, self.tetris.width - 1)
             else:
-                _range = reversed(range(1, self._field._width - 1))
+                range_ = reversed(range(1, self.tetris.width - 1))
 
-            for w in _range:
+            for w in range_:
                 button = self.gridLayout_field.itemAtPosition(h, w).widget()
 
                 if button:
@@ -232,23 +193,17 @@ class MainWindow(QMainWindow):
                     time.sleep(speed)
                     QApplication.processEvents()
 
-    def _rotate_clockwise(self):
-        self._field.rotate_clockwise_tetromino()
+    def update_game_time(self):
+        self.playing_time_in_seconds += 1
+        self.ui_update_game_time()
 
-    def _rotate_counterclockwise(self):
-        self._field.rotate_counter_clockwise_tetromino()
-
-    def _update_game_time(self):
-        self._playing_time_in_seconds += 1
-        self._ui_update_game_time()
-
-    def _ui_update_game_time(self):
-        minutes = self._playing_time_in_seconds // 60
-        seconds = self._playing_time_in_seconds % 60
+    def ui_update_game_time(self):
+        minutes = self.playing_time_in_seconds // 60
+        seconds = self.playing_time_in_seconds % 60
         self.label_game_time.setText("Time: {:02d}:{:02d}".format(minutes, seconds))
 
     def on_next_tetromino_update(self, tetromino):
-        self._initialise_next_tetromino_grid(tetromino)
+        self.initialise_next_tetromino_grid(tetromino)
 
         for h, line in enumerate(tetromino.brick_matrix):
             for w, cell in enumerate(line):
@@ -283,7 +238,7 @@ class MainWindow(QMainWindow):
     def on_lines_update(self, value):
         self.label_lines_value.setText(str(value))
 
-    def _initialise_next_tetromino_grid(self, tetromino):
+    def initialise_next_tetromino_grid(self, tetromino):
         # the widget is deleted when its parent is deleted.
         # Important note: You need to loop backwards because removing
         # things from the beginning shifts items and changes the order of items in the layout.
@@ -355,8 +310,3 @@ class MainWindow(QMainWindow):
             )
 
         button.setStyleSheet("; ".join(stylesheet))
-
-    # def _reset_gridLayout_next_tetromino(self):
-    #     for i in range(self.gridLayout_field.count()):
-    #         button = self.gridLayout_field.itemAt(i).widget()
-    #         button.setStyleSheet("")

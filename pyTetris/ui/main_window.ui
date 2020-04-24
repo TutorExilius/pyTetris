@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>361</width>
-    <height>483</height>
+    <width>364</width>
+    <height>490</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -485,7 +485,7 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>361</width>
+     <width>364</width>
      <height>21</height>
     </rect>
    </property>
@@ -502,8 +502,15 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
     </property>
     <addaction name="actionAbout_Qt"/>
    </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="action_Controls"/>
+   </widget>
    <addaction name="menu_Menu"/>
    <addaction name="menu_About"/>
+   <addaction name="menu_Help"/>
   </widget>
   <action name="action_Quit">
    <property name="text">
@@ -513,6 +520,11 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
   <action name="actionAbout_Qt">
    <property name="text">
     <string>About &amp;Qt</string>
+   </property>
+  </action>
+  <action name="action_Controls">
+   <property name="text">
+    <string>&amp;Controls</string>
    </property>
   </action>
  </widget>
