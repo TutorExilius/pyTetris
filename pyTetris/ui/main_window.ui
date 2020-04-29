@@ -6,16 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>364</width>
-    <height>490</height>
+    <width>370</width>
+    <height>483</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>pyTetris 2020 v1.0</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#centralwidget{
-background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
+   <string notr="true">* {
+background-color:white;
+}
+
+#centralwidget{
+background-image: url(&quot;C:/dev/python/pyTetris/pyTetris/ui/tetris_background_1.png&quot;);
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -109,6 +113,9 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
             <weight>75</weight>
             <bold>true</bold>
            </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
           </property>
           <property name="text">
            <string>Next</string>
@@ -293,6 +300,9 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
             <bold>false</bold>
            </font>
           </property>
+          <property name="styleSheet">
+           <string notr="true">color: white;</string>
+          </property>
           <property name="text">
            <string>Time: 00:00</string>
           </property>
@@ -319,6 +329,9 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_state">
+          <property name="styleSheet">
+           <string notr="true">color: white; background-color: rgb(52, 64, 174);</string>
+          </property>
           <property name="title">
            <string/>
           </property>
@@ -485,7 +498,7 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>364</width>
+     <width>370</width>
      <height>21</height>
     </rect>
    </property>
@@ -501,6 +514,7 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
      <string>&amp;About</string>
     </property>
     <addaction name="actionAbout_Qt"/>
+    <addaction name="action_About_pyTetris"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -508,9 +522,16 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
     </property>
     <addaction name="action_Controls"/>
    </widget>
+   <widget class="QMenu" name="menu_Donate">
+    <property name="title">
+     <string>&amp;Donate</string>
+    </property>
+    <addaction name="action_Support_Tutor_Exilius"/>
+   </widget>
    <addaction name="menu_Menu"/>
    <addaction name="menu_About"/>
    <addaction name="menu_Help"/>
+   <addaction name="menu_Donate"/>
   </widget>
   <action name="action_Quit">
    <property name="text">
@@ -525,6 +546,16 @@ background-image: url(&quot;C:/Users/twitch/Desktop/bg.png&quot;);
   <action name="action_Controls">
    <property name="text">
     <string>&amp;Controls</string>
+   </property>
+  </action>
+  <action name="action_About_pyTetris">
+   <property name="text">
+    <string>About &amp;pyTetris</string>
+   </property>
+  </action>
+  <action name="action_Support_Tutor_Exilius">
+   <property name="text">
+    <string>&amp;Support Tutor Exilius</string>
    </property>
   </action>
  </widget>

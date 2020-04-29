@@ -6,7 +6,7 @@ from pyTetris.main_window import MainWindow
 def main():
     app = QApplication([])
 
-    main_window = MainWindow(21, 12)
+    main_window = MainWindow(23, 12)
     main_window.timer.start()
     main_window.show()
 
