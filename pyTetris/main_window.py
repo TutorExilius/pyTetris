@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         background_image = str(Path(__file__).parent / "ui" / "tetris_backgroung_1.png")
         bg_style = "#centralwidget{ background-color: white; " + f"background-image: url('{background_image}');" + "}"
 
-        # Need it! (windows?!) WTF? why?!
+        # CSS path requires /
         bg_style = bg_style.replace("\\", "/")
 
         # set background-image
