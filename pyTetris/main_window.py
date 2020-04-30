@@ -343,9 +343,6 @@ https://www.twitch.tv/tutorexilius</td></tr>
     def on_field_update(self, field):
         for h, rows in enumerate(field):
             for w, cell in enumerate(rows):
-                # if cell == -1 or cell == -2:
-                #     continue
-
                 try:
                     item = self.gridLayout_field.itemAtPosition(h, w)
                     if item is not None:

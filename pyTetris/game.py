@@ -445,40 +445,17 @@ class Game(QObject):
             self.main_window.clear_pause_label()
 
     def rotate_clockwise_tetromino(self):
-        if self.current_tetromino:
-
-            if self.current_tetromino.tetromio_type == TetrominoType.O_BRICK:
-                return False
-
-            tmp = deepcopy(self.current_tetromino)
-            self.current_tetromino.rotate(RotationType.CLOCKWISE)
-
-            # reset rotation
-            if not self.is_possible(self.playing_cursor, self.current_tetromino):
-                self.current_tetromino = tmp
-                return False
-
-            return True
-
-        return False
+        self._rotate(RotationType.CLOCKWISE)
 
     def rotate_counter_clockwise_tetromino(self):
-        if self.current_tetromino:
+        self._rotate(RotationType.COUNTER_CLOCKWISE)
 
-            if self.current_tetromino.tetromio_type == TetrominoType.O_BRICK:
-                return False
+    def _rotate(self, rotation_type):
+        rotated_tetromino = deepcopy(self.current_tetromino)
+        rotated_tetromino.rotate(rotation_type)
 
-            tmp = deepcopy(self.current_tetromino)
-            self.current_tetromino.rotate(RotationType.COUNTER_CLOCKWISE)
-
-            # reset rotation
-            if not self.is_possible(self.playing_cursor, self.current_tetromino):
-                self.current_tetromino = tmp
-                return False
-
-            return True
-
-        return False
+        if self.is_possible(self.playing_cursor, rotated_tetromino):
+            self.current_tetromino = rotated_tetromino
 
     def move(self, action=Action.DOWN):
         h, w = self.playing_cursor
