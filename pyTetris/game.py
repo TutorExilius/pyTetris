@@ -411,7 +411,6 @@ class Game(QObject):
         # HARD DROP
         elif key == QtCore.Qt.Key_Space and not self.pause:
             self.game_window_action.emit(GameWindowAction.HARD_DROP)
-
             self.move_timer.stop()
             self.move(Action.DROP)
             self.move_timer.setInterval(self.calculate_move_speed())
@@ -420,6 +419,9 @@ class Game(QObject):
         # PAUSE
         elif key == QtCore.Qt.Key_P:
             self.pause_game()
+
+        if key != QtCore.Qt.Key_P and not self.pause:
+            self.update_field()
 
     def pause_game(self, play_sound=True):
         self.pause = not self.pause
@@ -470,7 +472,8 @@ class Game(QObject):
             w += 1
         elif action == Action.DROP:
             while self.move(Action.DOWN):
-                time.sleep(0.0025)
+                pass
+
             self.hard_dropped = True
             return
 
@@ -478,6 +481,8 @@ class Game(QObject):
 
         if self.is_possible(new_pos, self.current_tetromino):
             self.playing_cursor = new_pos
+
+            self.update_field()
             return True
         else:
             if action != Action.LEFT and action != Action.RIGHT:
@@ -502,9 +507,6 @@ class Game(QObject):
             if self.main_window.rounds == 1:
                 self.pause_game()
 
-        if not self.pause:
-            self.update_field()
-
         if self.collision_detected:
             self.stamp_tetromino()
 
@@ -519,6 +521,7 @@ class Game(QObject):
         next_tetromino = self.next_tetromino
         self.next_tetromino = Tetromino(choice(list(TetrominoType)))
         if self.spawn(next_tetromino):
+            self.update_field()
             self.next_tetromino_updated.emit(self.next_tetromino)
             return False
         else:
@@ -587,8 +590,6 @@ class Game(QObject):
         self.stamped_tetromino.emit()
         self.score += self.soft_drops
         self.soft_drops = 0
-
-        time.sleep(0.025)
 
     def check_complete_lines(self):
         complete_lines = []

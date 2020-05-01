@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>370</width>
-    <height>481</height>
+    <width>334</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>pyTetris 2020 - v1.0.1</string>
+   <string>pyTetris 2020 - v1.0.2</string>
   </property>
   <property name="styleSheet">
    <string notr="true">* {
@@ -498,7 +498,7 @@ background-image: url(&quot;C:/dev/python/pyTetris/pyTetris/ui/tetris_background
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>370</width>
+     <width>334</width>
      <height>21</height>
     </rect>
    </property>
