@@ -57,8 +57,8 @@ class MainWindow(QMainWindow):
         self.tetris = None
         self.playing_time_in_seconds = 0
         self.playing_time_in_seconds = 0
-        self.timer = QTimer(self.parent())
-        self.timer.timeout.connect(
+        self.start_new_game_timer = QTimer(self.parent())
+        self.start_new_game_timer.timeout.connect(
             functools.partial(self.start_game, field_height, field_width, self)
         )
 
@@ -98,9 +98,9 @@ class MainWindow(QMainWindow):
 
     def keyPressEvent(self, e):
         # START NEW GAME
-        if not self.tetris.is_running and self.is_game_over:
-            if e.key() == QtCore.Qt.Key_N:
-                self.timer.start()
+        if not self.tetris.is_running:
+            if self.is_game_over and e.key() == QtCore.Qt.Key_N:
+                self.start_new_game_timer.start()
         else:
             self.tetris.handle_input(e.key())
 
@@ -145,7 +145,7 @@ https://www.twitch.tv/tutorexilius</td></tr>
         self.on_lines_update(0)
         self.clear_game_over_label()
         self.clear_press_n_label()
-        self.timer.stop()
+        self.start_new_game_timer.stop()
 
     def start_game(self, field_height, field_width, main_window):
         self.rounds += 1
@@ -165,8 +165,6 @@ https://www.twitch.tv/tutorexilius</td></tr>
 
         self.tetris.player.stop()
         self.game_timer.stop()
-
-        self.tetris.is_running = False
 
         # fix: avoid gameover animation, if window is closed by user
         if self.closeEvent != self.force_closeEvent:
@@ -383,7 +381,7 @@ https://www.twitch.tv/tutorexilius</td></tr>
                 button.setStyleSheet("border: 0px;")
                 self.gridLayout_next_tetromino.addWidget(button, h, w)
 
-        self.frame_next_tetromino.setStyleSheet("border: 3px double black;")
+        self.frame_next_tetromino.setStyleSheet("background-color: white; border: 3px double black;")
 
     def update_button(self, button, cell_value, draw_frame=True):
         stylesheet = []

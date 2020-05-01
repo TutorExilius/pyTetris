@@ -294,7 +294,7 @@ class Game(QObject):
 
         self.player = QMediaPlayer()
         self.player.setPlaylist(self.playlist)
-        self.player.setVolume(25)
+        self.player.setVolume(50)
 
         self.main_window = main_window
         self.sound_manager = SoundManager(self)
@@ -397,9 +397,8 @@ class Game(QObject):
         elif key == QtCore.Qt.Key_K and not self.pause:
             if self.current_tetromino.tetromio_type == TetrominoType.O_BRICK:
                 self.game_window_action.emit(GameWindowAction.NONSENSE_ROTATION)
-            else:
-                if self.rotate_clockwise_tetromino():
-                    self.game_window_action.emit(GameWindowAction.ROTATION)
+            elif self.rotate_clockwise_tetromino():
+                self.game_window_action.emit(GameWindowAction.ROTATION)
 
         # ROTATION
         elif key == QtCore.Qt.Key_J and not self.pause:
@@ -445,10 +444,10 @@ class Game(QObject):
             self.main_window.clear_pause_label()
 
     def rotate_clockwise_tetromino(self):
-        self._rotate(RotationType.CLOCKWISE)
+        return self._rotate(RotationType.CLOCKWISE)
 
     def rotate_counter_clockwise_tetromino(self):
-        self._rotate(RotationType.COUNTER_CLOCKWISE)
+        return self._rotate(RotationType.COUNTER_CLOCKWISE)
 
     def _rotate(self, rotation_type):
         rotated_tetromino = deepcopy(self.current_tetromino)
@@ -456,6 +455,9 @@ class Game(QObject):
 
         if self.is_possible(self.playing_cursor, rotated_tetromino):
             self.current_tetromino = rotated_tetromino
+            return True
+
+        return False
 
     def move(self, action=Action.DOWN):
         h, w = self.playing_cursor
@@ -509,7 +511,7 @@ class Game(QObject):
             # spawn next tetomino
             self.collision_detected = self.build_next_tetromino()
 
-            return not self.collision_detected
+            self.is_running = not self.collision_detected
 
         return self.is_running
 
