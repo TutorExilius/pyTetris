@@ -96,6 +96,7 @@ class MainWindow(QMainWindow):
             self.close()
 
     def force_closeEvent(self, event):
+        self.tetris = None
         event.accept()
 
     def keyPressEvent(self, e):
