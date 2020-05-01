@@ -50,6 +50,8 @@ class MainWindow(QMainWindow):
         self.users_start_level = 0
 
         self.rounds = 0
+        self.key_input_lock = False
+
         self.is_game_over = False
         self.game_timer = QTimer()
         self.game_timer.setInterval(1000)
@@ -97,12 +99,19 @@ class MainWindow(QMainWindow):
         event.accept()
 
     def keyPressEvent(self, e):
+        if self.key_input_lock:
+            return
+
+        self.key_input_lock = True
+
         # START NEW GAME
         if not self.tetris.is_running:
             if self.is_game_over and e.key() == QtCore.Qt.Key_N:
                 self.start_new_game_timer.start()
         else:
             self.tetris.handle_input(e.key())
+
+        self.key_input_lock = False
 
     def on_about_qt(self):
         QMessageBox.aboutQt(self)
