@@ -1,4 +1,4 @@
-# pyTetris 2020 - v1.0
+# pyTetris 2020 - v1.0.1
 
 
 ## Requirments:
