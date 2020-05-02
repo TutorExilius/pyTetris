@@ -19,10 +19,9 @@ class MainWindow(QMainWindow):
         uic.loadUi(Path(__file__).parent / "ui" / "main_window.ui", self)
 
         # background images
-        background_image_1 = str(Path(__file__).parent / "ui" / "tetris_backgroung_1.png")
-        background_image_2 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_default-bg.jpg")
-        background_image_3 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_halloween-bg.jpg")
-        background_image_4 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_matrix-bg.jpg")
+        background_image_1 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_default-bg.jpg")
+        background_image_2 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_halloween-bg.jpg")
+        background_image_3 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_matrix-bg.jpg")
 
         self.default_cell_stylesheet = (
             f"border: 0px; border-top: 1px solid #ccc; border-left: 1px solid #ccc; background-color: white;"
@@ -68,7 +67,7 @@ class MainWindow(QMainWindow):
         self.player.setVolume(100)
         self.sound_bye = str(Path(__file__).parent / "sounds" / "bye.wav")
 
-        self.draw_background_image(background_image_2)
+        self.draw_background_image(background_image_1)
 
     def draw_background_image(self, image):
         o_image = QImage(image)
