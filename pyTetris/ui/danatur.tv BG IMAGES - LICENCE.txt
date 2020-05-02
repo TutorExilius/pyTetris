@@ -1,0 +1,23 @@
+Background-Images based on:
+	Efe Kurnaz - https://unsplash.com/photos/RnCPiXixooY
+	Jack Cain - https://unsplash.com/photos/EKF89yEbGf8 
+	Markus Spiske - https://unsplash.com/photos/iar-afB0QQw
+
+
+
+Author/Designer: 
+	Danatur
+	Dana Junghanß - Digitale Gestaltung
+
+	www.danatur.de
+	twitch.tv/danatur
+
+
+Licence:
+	CC-BY-SA-3.0
+
+Files:
+	danatur.tv_tetris_default-bg.jpg
+	danatur.tv_tetris_halloween-bg.jpg
+	danatur.tv_tetris_matrix-bg.jpg
+

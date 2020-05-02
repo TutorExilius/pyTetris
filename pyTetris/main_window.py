@@ -3,7 +3,8 @@ import time
 from itertools import count
 from pathlib import Path
 from PyQt5 import uic, QtCore
-from PyQt5.QtCore import QTimer, QUrl, pyqtSignal
+from PyQt5.QtCore import QTimer, QUrl, pyqtSignal, QSize
+from PyQt5.QtGui import QPixmap, QPalette, QBrush, QImage
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QSound
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QMessageBox
 from pyTetris.game import Game
@@ -17,18 +18,14 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
         uic.loadUi(Path(__file__).parent / "ui" / "main_window.ui", self)
 
-        # load background image
-        background_image = str(Path(__file__).parent / "ui" / "tetris_backgroung_1.png")
-        bg_style = "#centralwidget{ background-color: white; " + f"background-image: url('{background_image}');" + "}"
-
-        # CSS path requires /
-        bg_style = bg_style.replace("\\", "/")
-
-        # set background-image
-        self.setStyleSheet(bg_style)
+        # background images
+        background_image_1 = str(Path(__file__).parent / "ui" / "tetris_backgroung_1.png")
+        background_image_2 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_default-bg.jpg")
+        background_image_3 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_halloween-bg.jpg")
+        background_image_4 = str(Path(__file__).parent / "ui" / "danatur.tv_tetris_matrix-bg.jpg")
 
         self.default_cell_stylesheet = (
-            f"border: 0px; border-top: 1px solid #ccc; border-left: 1px solid #ccc;"
+            f"border: 0px; border-top: 1px solid #ccc; border-left: 1px solid #ccc; background-color: white;"
         )
 
         # Connections
@@ -70,6 +67,15 @@ class MainWindow(QMainWindow):
         self.player = QMediaPlayer()
         self.player.setVolume(100)
         self.sound_bye = str(Path(__file__).parent / "sounds" / "bye.wav")
+
+        self.draw_background_image(background_image_2)
+
+    def draw_background_image(self, image):
+        o_image = QImage(image)
+        s_image = o_image.scaled(self.size())  # resize Image to widgets size
+        palette = QPalette()
+        palette.setBrush(QPalette.Window, QBrush(s_image))
+        self.setPalette(palette)
 
     def closeEvent(self, event):
         self.tetris.is_running = False
@@ -126,8 +132,8 @@ class MainWindow(QMainWindow):
 <tr><td>Right:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>→, D</b></td></tr>
 <tr><td>Soft Drop:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>↓, S</b></td></tr>
 <tr><td>Hard Drop:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>SPACE</b></td></tr>
-<tr><td>Rotate Right:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>J</b></td></tr>
-<tr><td>Rotate Left:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>K</b></td></tr></table>""",
+<tr><td>Rotate Left:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>J</b></td></tr>
+<tr><td>Rotate Right:</td><td>&nbsp;&nbsp;&nbsp;</td><td><b>K</b></td></tr></table>""",
         )
 
     def on_about_py_tetris(self):
@@ -136,14 +142,21 @@ class MainWindow(QMainWindow):
             "About pyTetris 2020",
             """<table style="margin: 6px 18px 6px 12px;">
 <tr><td><b>Developer&nbsp;&nbsp;&nbsp;&nbsp;</b></td><td>Tutor Exilius</td><tr>
-<tr><td>Source-Code:&nbsp;&nbsp;&nbsp;&nbsp;</td><td>https://github.com/tutorexilius/pyTetris<br>
+<tr><td>Source-Code:&nbsp;&nbsp;&nbsp;&nbsp;</td><td>https://github.com/tutorexilius/pyTetris<br>GPLv3
 <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>https://www.exilius.de<br>
 https://www.tutorexilius.de<br>
 https://www.twitch.tv/tutorexilius</td></tr>
 <tr><td colspan=2></td></tr>
+<tr><td><b>Background&nbsp;&nbsp;&nbsp;&nbsp;<br></td><td>Danatur<br>
+Dana Junghanß - Digitale Gestaltung</td></tr>
+<tr><td colspan=2></td></tr>
+<tr><td><b></td><td>www.danatur.de<br>
+twitch.tv/danatur<br><br>CC-BY-SA</td></tr>
+<tr><td colspan=2></td></tr>
 <tr><td><b>Music&nbsp;&nbsp;&nbsp;&nbsp;<br></td><td>Bogozi - Tetris_theme</td></tr>
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Bogozi/CC BY-SA<br>https://creativecommons.org/licenses/by-sa/3.0</td></tr>
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>https://commons.wikimedia.org/wiki/File:Tetris_theme.ogg</td></tr></table>""",
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>CC-BY-SA<br>https://creativecommons.org/licenses/by-sa/3.0</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>https://commons.wikimedia.org/wiki/File:Tetris_theme.ogg</td>
+</tr></table>""",
         )
 
     def reset_states(self):
@@ -196,7 +209,6 @@ https://www.twitch.tv/tutorexilius</td></tr>
             for w in _range:
                 button = self.gridLayout_field.itemAtPosition(h, w).widget()
                 button.setStyleSheet("background-color: black;")
-
                 time.sleep(speed)
 
             QApplication.processEvents()
