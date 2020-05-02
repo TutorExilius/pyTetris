@@ -417,7 +417,7 @@ twitch.tv/danatur<br><br>CC-BY-SA</td></tr>
                 stylesheet.append("border: 0px")
 
         if cell_value == -3:
-            stylesheet.append("background-color: rgba(150, 150, 150, 100);")
+            stylesheet.append("background-color: rgb(220, 220, 220); border: 1px solid #aaa;")
         if cell_value == -2:
             stylesheet.append("background-color: black")
         if cell_value == -1:
