@@ -404,6 +404,8 @@ https://www.twitch.tv/tutorexilius</td></tr>
             else:
                 stylesheet.append("border: 0px")
 
+        if cell_value == -3:
+            stylesheet.append("background-color: rgba(150, 150, 150, 100);")
         if cell_value == -2:
             stylesheet.append("background-color: black")
         if cell_value == -1:

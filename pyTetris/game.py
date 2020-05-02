@@ -370,8 +370,21 @@ class Game(QObject):
 
     def update_field(self):
         final_field = deepcopy(self.field)
-        self.merge_tetromino_with_field(final_field)
+        self.draw_shadow_tetromino(final_field)
+        self.merge_tetromino_with_field(self.current_tetromino, final_field)
         self.field_updated.emit(final_field)
+
+    def draw_shadow_tetromino(self, final_field):
+        shadow_h, shadow_w = self.playing_cursor
+
+        while self.is_possible((shadow_h, shadow_w), self.current_tetromino):
+            shadow_h += 1
+
+        shadow_h -= 1
+
+        shadow_cursor = (shadow_h, shadow_w)
+
+        self.merge_tetromino_with_field(self.current_tetromino, final_field, shadow_cursor)
 
     def on_game_over(self):
         self.sound_manager.on_game_window_action(GameWindowAction.GAME_OVER)
@@ -586,7 +599,7 @@ class Game(QObject):
         else:
             self.game_window_action.emit(GameWindowAction.STAMP)
 
-        self.merge_tetromino_with_field(self.field)
+        self.merge_tetromino_with_field(self.current_tetromino, self.field)
         self.stamped_tetromino.emit()
         self.score += self.soft_drops
         self.soft_drops = 0
@@ -674,11 +687,14 @@ class Game(QObject):
     def update_speed(self):
         self.move_timer.setInterval(self.calculate_move_speed())
 
-    def merge_tetromino_with_field(self, field):
-        cursor_h, cursor_w = self.playing_cursor
+    def merge_tetromino_with_field(self, tetromino, field, shadowed_pos=None):
+        if shadowed_pos:
+            cursor_h, cursor_w = shadowed_pos
+        else:
+            cursor_h, cursor_w = self.playing_cursor
 
-        tetromino_h = len(self.current_tetromino.brick_matrix)
-        tetromino_w = len(self.current_tetromino.brick_matrix[0])
+        tetromino_h = len(tetromino.brick_matrix)
+        tetromino_w = len(tetromino.brick_matrix[0])
 
         try:
             for h in range(tetromino_h):
@@ -686,9 +702,12 @@ class Game(QObject):
                     if (cursor_h + h) in range(self.height) and (cursor_w + w) in range(
                             self.width
                     ):
-                        value = self.current_tetromino.brick_matrix[h][w]
+                        value = tetromino.brick_matrix[h][w]
 
                         if value != 0:
-                            field[cursor_h + h][cursor_w + w] = value
+                            if shadowed_pos:
+                                field[cursor_h + h][cursor_w + w] = -3
+                            else:
+                                field[cursor_h + h][cursor_w + w] = value
         except Exception as e:
             print(e)
