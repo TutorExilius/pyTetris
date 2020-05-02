@@ -6,15 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>601</width>
-    <height>606</height>
+    <width>334</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>pyTetris 2020 - v1.1</string>
+   <string>pyTetris 2020 - v1.2</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">* {
+background-color:white;
+}
+
+#centralwidget{
+background-image: url(&quot;C:/dev/python/pyTetris/pyTetris/ui/tetris_background_1.png&quot;);
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="minimumSize">
@@ -492,7 +498,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>601</width>
+     <width>334</width>
      <height>21</height>
     </rect>
    </property>
