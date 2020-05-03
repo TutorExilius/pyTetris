@@ -338,7 +338,7 @@ class Game(QObject):
             4,
             3,
         ]
-        self.hard_dropped = False
+        self.on_hard_dropping = False
         self.is_running = False
         self.height = height
         self.width = width
@@ -484,10 +484,12 @@ class Game(QObject):
         elif action == Action.RIGHT:
             w += 1
         elif action == Action.DROP:
+            self.on_hard_dropping = True
+
             while self.move(Action.DOWN):
                 pass
 
-            self.hard_dropped = True
+            # self.on_hard_dropping = False
             return
 
         new_pos = (h, w)
@@ -495,7 +497,9 @@ class Game(QObject):
         if self.is_possible(new_pos, self.current_tetromino):
             self.playing_cursor = new_pos
 
-            self.update_field()
+            if not self.on_hard_dropping:
+                self.update_field()
+
             return True
         else:
             if action != Action.LEFT and action != Action.RIGHT:
@@ -594,8 +598,8 @@ class Game(QObject):
         return True
 
     def stamp_tetromino(self):
-        if self.hard_dropped:
-            self.hard_dropped = False
+        if self.on_hard_dropping:
+            self.on_hard_dropping = False
         else:
             self.game_window_action.emit(GameWindowAction.STAMP)
 
