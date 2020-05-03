@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>pyTetris 2020 - v1.1.2</string>
+   <string>pyTetris 2020 - v1.1.3</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="minimumSize">
@@ -492,6 +492,9 @@
      <width>601</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
    </property>
    <widget class="QMenu" name="menu_Menu">
     <property name="title">
