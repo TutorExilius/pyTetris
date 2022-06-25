@@ -546,11 +546,11 @@ class Game(QObject):
 
             return False
 
-    def calculate_move_speed(self):
+    def calculate_move_speed(self) -> int:
         level = min(self.level, len(self.level_speed_frames) - 1)
         speed_frames = self.level_speed_frames[level]
 
-        return (speed_frames / self.frames_per_second) * 1000  # ms
+        return int((speed_frames / self.frames_per_second) * 1000)
 
     def running(self):
         if not self.move_timer:
