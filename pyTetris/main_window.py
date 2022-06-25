@@ -184,6 +184,7 @@ twitch.tv/danatur<br><br>CC-BY-SA</td></tr>
 
         while self.tetris.running():
             QApplication.processEvents()
+            time.sleep(0.016)  # optimize performance
 
         self.tetris.player.stop()
         self.game_timer.stop()
