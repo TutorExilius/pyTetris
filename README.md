@@ -1,9 +1,9 @@
-# pyTetris 2020 - v1.1.3a
+# pyTetris 2020 - v1.2
 
 
 ## Requirments:
 
-Python 3.8 (maybe >3.4) (Created and tested in python 3.8)
+&gt;= Python 3.8 (Created and tested in python 3.8 and 3.9)
 
 
 ## Installation:

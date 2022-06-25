@@ -1,9 +1,9 @@
 import random
-import time
 from copy import deepcopy
 from enum import IntEnum
 from pathlib import Path
 from random import choice
+
 from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer, QObject, pyqtSignal, QUrl
 from PyQt5.QtMultimedia import QSound, QMediaPlayer, QMediaContent, QMediaPlaylist
@@ -46,109 +46,6 @@ class GameWindowAction(IntEnum):
     HARD_DROP = 12
     CLOSE_GAME = 13
     DONATE_LINK = 14
-
-
-class SoundManager(QObject):
-    def __init__(self, parent):
-        super(SoundManager, self).__init__(parent)
-
-    def on_game_window_action(self, game_window_action):
-        if game_window_action == GameWindowAction.ROTATION:
-            rand_num = random.randrange(1, 8)  # currently 7 sounds available
-
-            sound = str(Path(__file__).parent / "sounds" / f"rotate_{rand_num}.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/rotate_{rand_num}.wav")
-
-        # ROTATION
-        elif game_window_action == GameWindowAction.NONSENSE_ROTATION:
-            rand_num = random.randrange(1, 8)  # currently 7 sounds available
-
-            sound = str(Path(__file__).parent / "sounds" / f"nonsense_rotate_{rand_num}.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/nonsense_rotate_{rand_num}.wav")
-
-        # PAUSE
-        elif game_window_action == GameWindowAction.PAUSE_ACTIVED:
-            sound = str(Path(__file__).parent / "sounds" / "pause_on.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/pause_on.wav")
-
-        # PAUSE
-        elif game_window_action == GameWindowAction.PAUSE_INACTIVATED:
-            sound = str(Path(__file__).parent / "sounds" / "pause_off.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/pause_off.wav")
-
-        # STAMP
-        elif game_window_action == GameWindowAction.STAMP:
-            rand_num = random.randrange(1, 3)  # currently 2 sounds available
-
-            sound = str(Path(__file__).parent / "sounds" / f"stamp_{rand_num}.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/stamp_{rand_num}.wav")
-
-        # LINE CLEAR
-        elif (
-                game_window_action == GameWindowAction.SINGLE_LINE_CLEAR
-                or game_window_action == GameWindowAction.DOUBLE_LINE_CLEAR
-                or game_window_action == GameWindowAction.TRIPLE_LINE_CLEAR
-        ):
-            rand_num = random.randrange(1, 4)  # currently 3 sounds available
-
-            sound = str(Path(__file__).parent / "sounds" / f"clear_line_{rand_num}.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/clear_line_{rand_num}.wav")
-
-        # TETRIS CLEAR
-        elif game_window_action == GameWindowAction.TETRIS_LINE_CLEAR:
-            rand_num = random.randrange(1, 4)  # currently 3 sounds available
-
-            sound = str(Path(__file__).parent / "sounds" / f"clear_tetris_{rand_num}.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/clear_tetris_{rand_num}.wav")
-
-        # LEVEL UP
-        elif game_window_action == GameWindowAction.LEVEL_UP:
-            rand_num = random.randrange(1, 3)  # currently 2 sounds available
-
-            sound = str(Path(__file__).parent / "sounds" / f"level_up_{rand_num}.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/level_up_{rand_num}.wav")
-
-        # HARD DROP
-        elif game_window_action == GameWindowAction.HARD_DROP:
-            rand_num = random.randrange(1, 3)  # currently 2 sounds available
-
-            sound = str(Path(__file__).parent / "sounds" / f"hard_drop_{rand_num}.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/hard_drop_{rand_num}.wav")
-
-        # GAME OVER
-        elif game_window_action == GameWindowAction.GAME_OVER:
-            sound = str(Path(__file__).parent / "sounds" / f"game_over.wav")
-            QSound.play(sound)
-
-            # DEBUG
-            print(f"sounds/game_over.wav")
 
 
 class Tetromino:
@@ -273,6 +170,134 @@ class Tetromino:
             return [[0, t, 0], [t, t, 0], [t, 0, 0]]
 
 
+class SoundManager(QObject):
+    def __init__(self, parent):
+        super(SoundManager, self).__init__(parent)
+
+    @QtCore.pyqtSlot(GameWindowAction)
+    @QtCore.pyqtSlot(GameWindowAction, Tetromino, int)
+    def on_game_window_action(
+            self,
+            game_window_action,
+            current_tetromino=None,
+            count_rotations=0,
+    ):
+        if game_window_action == GameWindowAction.ROTATION:
+            rand_num = random.randrange(1, 8)  # currently 7 sounds available
+
+            sound = str(Path(__file__).parent / "sounds" / f"rotate_{rand_num}.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/rotate_{rand_num}.wav")
+
+        # ROTATION
+        elif game_window_action == GameWindowAction.NONSENSE_ROTATION:
+            rand_num = random.randrange(1, 8)  # currently 7 sounds available
+
+            sound = str(Path(__file__).parent / "sounds" / f"nonsense_rotate_{rand_num}.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/nonsense_rotate_{rand_num}.wav")
+
+        # PAUSE
+        elif game_window_action == GameWindowAction.PAUSE_ACTIVED:
+            sound = str(Path(__file__).parent / "sounds" / "pause_on.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/pause_on.wav")
+
+        # PAUSE
+        elif game_window_action == GameWindowAction.PAUSE_INACTIVATED:
+            sound = str(Path(__file__).parent / "sounds" / "pause_off.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/pause_off.wav")
+
+        # STAMP
+        elif game_window_action == GameWindowAction.STAMP:
+            rand_num = random.randrange(1, 3)  # currently 2 sounds available
+
+            sound = str(Path(__file__).parent / "sounds" / f"stamp_{rand_num}.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/stamp_{rand_num}.wav")
+
+        # LINE CLEAR
+        elif (
+                game_window_action == GameWindowAction.SINGLE_LINE_CLEAR
+                or game_window_action == GameWindowAction.TRIPLE_LINE_CLEAR
+        ):
+            rand_num = random.randrange(1, 4)  # currently 3 sounds available
+
+            sound = str(Path(__file__).parent / "sounds" / f"clear_line_{rand_num}.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/clear_line_{rand_num}.wav")
+
+        elif game_window_action == GameWindowAction.DOUBLE_LINE_CLEAR:
+            if current_tetromino.tetromio_type == TetrominoType.T_BRICK \
+                    and current_tetromino.rotation_index == 0 \
+                    and count_rotations > 0:
+
+                sound = str(Path(__file__).parent / "sounds" / "schadenfreude_1.wav")
+                QSound.play(sound)
+
+                # DEBUG
+                print(f"sounds/schadenfreude_1.wav")
+            else:
+                rand_num = random.randrange(1, 4)  # currently 3 sounds available
+
+                sound = str(Path(__file__).parent / "sounds" / f"clear_line_{rand_num}.wav")
+                QSound.play(sound)
+
+                # DEBUG
+                print(f"sounds/clear_line_{rand_num}.wav")
+
+        # TETRIS CLEAR
+        elif game_window_action == GameWindowAction.TETRIS_LINE_CLEAR:
+            rand_num = random.randrange(1, 4)  # currently 3 sounds available
+
+            sound = str(Path(__file__).parent / "sounds" / f"clear_tetris_{rand_num}.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/clear_tetris_{rand_num}.wav")
+
+        # LEVEL UP
+        elif game_window_action == GameWindowAction.LEVEL_UP:
+            rand_num = random.randrange(1, 3)  # currently 2 sounds available
+
+            sound = str(Path(__file__).parent / "sounds" / f"level_up_{rand_num}.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/level_up_{rand_num}.wav")
+
+        # HARD DROP
+        elif game_window_action == GameWindowAction.HARD_DROP:
+            rand_num = random.randrange(1, 3)  # currently 2 sounds available
+
+            sound = str(Path(__file__).parent / "sounds" / f"hard_drop_{rand_num}.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/hard_drop_{rand_num}.wav")
+
+        # GAME OVER
+        elif game_window_action == GameWindowAction.GAME_OVER:
+            sound = str(Path(__file__).parent / "sounds" / f"game_over.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/game_over.wav")
+
+
 class Game(QObject):
     next_tetromino_updated = pyqtSignal(Tetromino)
     field_updated = pyqtSignal(list)
@@ -281,10 +306,20 @@ class Game(QObject):
     lines_updated = pyqtSignal(int)
     stamped_tetromino = pyqtSignal()
     pre_clear = pyqtSignal(list)
-    game_window_action = pyqtSignal(GameWindowAction)
+    game_window_action = pyqtSignal([GameWindowAction], [GameWindowAction, Tetromino, int])
 
     def __init__(self, height, width, main_window, start_level=0):
         QObject.__init__(self)
+
+        self.tetromino_type_start_cursors = {
+            TetrominoType.I_BRICK: (0, 4),
+            TetrominoType.J_BRICK: (1, 4),
+            TetrominoType.L_BRICK: (1, 4),
+            TetrominoType.O_BRICK: (1, 4),
+            TetrominoType.S_BRICK: (1, 4),
+            TetrominoType.T_BRICK: (1, 4),
+            TetrominoType.Z_BRICK: (1, 4),
+        }
 
         self.tetris_music = str(Path(__file__).parent / "sounds" / "Tetris_theme.wav")
 
@@ -300,7 +335,8 @@ class Game(QObject):
         self.sound_manager = SoundManager(self)
 
         # Connections
-        self.game_window_action.connect(self.sound_manager.on_game_window_action)
+        self.game_window_action[GameWindowAction].connect(self.sound_manager.on_game_window_action)
+        self.game_window_action[GameWindowAction, Tetromino, int].connect(self.sound_manager.on_game_window_action)
         self.next_tetromino_updated.connect(self.main_window.on_next_tetromino_update)
         self.field_updated.connect(self.main_window.on_field_update)
         self.score_updated.connect(self.main_window.on_score_update)
@@ -344,6 +380,7 @@ class Game(QObject):
         self.width = width
         self.playing_cursor = (0, 0)
         self.current_tetromino = None
+        self.current_tetromino_spin_matrix = None
         # PROPERTY!
         self._total_removed_lines = 0
         self.soft_drops = 0
@@ -356,7 +393,7 @@ class Game(QObject):
         self.pause = False
         self.move_timer = None
         self.collision_detected = False
-        self.next_tetromino = Tetromino(choice(list(TetrominoType)))
+        self.next_tetromino = Tetromino(tetromio_type=choice(list(TetrominoType)))
         self.build_next_tetromino()
 
     def initialise_field(self, field):
@@ -470,6 +507,8 @@ class Game(QObject):
 
         if self.is_possible(self.playing_cursor, rotated_tetromino):
             self.current_tetromino = rotated_tetromino
+            self.current_tetromino_spin_matrix[self.playing_cursor[0]] += 1
+            print("row:", self.playing_cursor[0], "count:", self.current_tetromino_spin_matrix[self.playing_cursor[0]])
             return True
 
         return False
@@ -536,7 +575,7 @@ class Game(QObject):
 
     def build_next_tetromino(self):
         next_tetromino = self.next_tetromino
-        self.next_tetromino = Tetromino(choice(list(TetrominoType)))
+        self.next_tetromino = Tetromino(tetromio_type=choice(list(TetrominoType)))
         if self.spawn(next_tetromino):
             self.update_field()
             self.next_tetromino_updated.emit(self.next_tetromino)
@@ -550,27 +589,17 @@ class Game(QObject):
         # https://tetris.fandom.com/wiki/Tetris_Guideline
         # (last visit 2020-03-14)
         self.current_tetromino = tetromino
+        self.current_tetromino_spin_matrix = {row: 0 for row in range(self.height)}
+
         tetromino_type = tetromino.tetromio_type
 
         if pos:
             self.playing_cursor = pos
         else:
-            if tetromino_type == TetrominoType.I_BRICK:
-                self.playing_cursor = (0, 4)
-            elif tetromino_type == TetrominoType.J_BRICK:
-                self.playing_cursor = (1, 4)
-            elif tetromino_type == TetrominoType.L_BRICK:
-                self.playing_cursor = (1, 4)
-            elif tetromino_type == TetrominoType.O_BRICK:
-                self.playing_cursor = (1, 4)
-            elif tetromino_type == TetrominoType.S_BRICK:
-                self.playing_cursor = (1, 4)
-            elif tetromino_type == TetrominoType.T_BRICK:
-                self.playing_cursor = (1, 4)
-            elif tetromino_type == TetrominoType.Z_BRICK:
-                self.playing_cursor = (1, 4)
-            else:
-                raise "UNKNOWN TETROMINO"
+            try:
+                self.playing_cursor = self.tetromino_type_start_cursors[tetromino_type]
+            except KeyError:
+                raise ValueError("UNKNOWN TETROMINO")
 
         return self.is_possible(self.playing_cursor, self.current_tetromino)
 
@@ -627,7 +656,11 @@ class Game(QObject):
             if cnt_complete_lines == 1:
                 self.game_window_action.emit(GameWindowAction.SINGLE_LINE_CLEAR)
             elif cnt_complete_lines == 2:
-                self.game_window_action.emit(GameWindowAction.DOUBLE_LINE_CLEAR)
+                self.game_window_action[GameWindowAction, Tetromino, int].emit(
+                    GameWindowAction.DOUBLE_LINE_CLEAR,
+                    self.current_tetromino,
+                    self.current_tetromino_spin_matrix[self.playing_cursor[0]],
+                )
             elif cnt_complete_lines == 3:
                 self.game_window_action.emit(GameWindowAction.TRIPLE_LINE_CLEAR)
             else:
