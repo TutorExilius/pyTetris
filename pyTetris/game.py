@@ -1,51 +1,52 @@
 import random
 from copy import deepcopy
-from enum import IntEnum
+from enum import IntEnum, auto
 from pathlib import Path
 from random import choice
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QTimer, QObject, pyqtSignal, QUrl
-from PyQt5.QtMultimedia import QSound, QMediaPlayer, QMediaContent, QMediaPlaylist
+from PyQt5.QtCore import pyqtSignal, QObject, QTimer, QUrl
+from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer, QMediaPlaylist, QSound
 
 
 class TetrominoType(IntEnum):
-    I_BRICK = 1
-    J_BRICK = 2
-    L_BRICK = 3
-    O_BRICK = 4
-    S_BRICK = 5
-    T_BRICK = 6
-    Z_BRICK = 7
+    I_BRICK = auto()
+    J_BRICK = auto()
+    L_BRICK = auto()
+    O_BRICK = auto()
+    S_BRICK = auto()
+    T_BRICK = auto()
+    Z_BRICK = auto()
 
 
 class Action(IntEnum):
-    LEFT = 1
-    RIGHT = 2
-    DOWN = 3
-    DROP = 4
+    LEFT = auto()
+    RIGHT = auto()
+    DOWN = auto()
+    DROP = auto()
 
 
 class RotationType(IntEnum):
-    CLOCKWISE = 1
-    COUNTER_CLOCKWISE = 2
+    CLOCKWISE = auto()
+    COUNTER_CLOCKWISE = auto()
 
 
 class GameWindowAction(IntEnum):
-    STAMP = 1
-    NONSENSE_ROTATION = 2
-    ROTATION = 3
-    PAUSE_ACTIVED = 4
-    PAUSE_INACTIVATED = 5
-    GAME_OVER = 6
-    SINGLE_LINE_CLEAR = 7
-    DOUBLE_LINE_CLEAR = 8
-    TRIPLE_LINE_CLEAR = 9
-    TETRIS_LINE_CLEAR = 10  # official name for four lines (full)
-    LEVEL_UP = 11
-    HARD_DROP = 12
-    CLOSE_GAME = 13
-    DONATE_LINK = 14
+    STAMP = auto()
+    NONSENSE_ROTATION = auto()
+    ROTATION = auto()
+    PAUSE_ACTIVATED = auto()
+    PAUSE_INACTIVATED = auto()
+    GAME_OVER = auto()
+    SINGLE_LINE_CLEAR = auto()
+    DOUBLE_LINE_CLEAR = auto()
+    TRIPLE_LINE_CLEAR = auto()
+    TETRIS_LINE_CLEAR = auto()  # official name for four lines (full)
+    T_SPIN_DOUBLE = auto()
+    LEVEL_UP = auto()
+    HARD_DROP = auto()
+    CLOSE_GAME = auto()
+    DONATE_LINK = auto()
 
 
 class Tetromino:
@@ -178,8 +179,6 @@ class SoundManager(QObject):
     def __init__(self, parent):
         super(SoundManager, self).__init__(parent)
 
-    @QtCore.pyqtSlot(GameWindowAction)
-    @QtCore.pyqtSlot(GameWindowAction, Tetromino, int, bool)
     def on_game_window_action(
             self,
             game_window_action,
@@ -207,7 +206,7 @@ class SoundManager(QObject):
             print(f"sounds/nonsense_rotate_{rand_num}.wav")
 
         # PAUSE
-        elif game_window_action == GameWindowAction.PAUSE_ACTIVED:
+        elif game_window_action == GameWindowAction.PAUSE_ACTIVATED:
             sound = str(Path(__file__).parent / "sounds" / "pause_on.wav")
             QSound.play(sound)
 
@@ -236,6 +235,7 @@ class SoundManager(QObject):
         elif (
                 game_window_action == GameWindowAction.SINGLE_LINE_CLEAR
                 or game_window_action == GameWindowAction.TRIPLE_LINE_CLEAR
+                or game_window_action == GameWindowAction.DOUBLE_LINE_CLEAR
         ):
             rand_num = random.randrange(1, 4)  # currently 3 sounds available
 
@@ -244,25 +244,6 @@ class SoundManager(QObject):
 
             # DEBUG
             print(f"sounds/clear_line_{rand_num}.wav")
-
-        elif game_window_action == GameWindowAction.DOUBLE_LINE_CLEAR:
-            if current_tetromino.tetromio_type == TetrominoType.T_BRICK \
-                    and has_minimum_3_occupied_edges \
-                    and count_rotations > 0:
-
-                sound = str(Path(__file__).parent / "sounds" / "schadenfreude_1.wav")
-                QSound.play(sound)
-
-                # DEBUG
-                print(f"sounds/schadenfreude_1.wav")
-            else:
-                rand_num = random.randrange(1, 4)  # currently 3 sounds available
-
-                sound = str(Path(__file__).parent / "sounds" / f"clear_line_{rand_num}.wav")
-                QSound.play(sound)
-
-                # DEBUG
-                print(f"sounds/clear_line_{rand_num}.wav")
 
         # TETRIS CLEAR
         elif game_window_action == GameWindowAction.TETRIS_LINE_CLEAR:
@@ -273,6 +254,14 @@ class SoundManager(QObject):
 
             # DEBUG
             print(f"sounds/clear_tetris_{rand_num}.wav")
+
+        # T SPIN DOUBLE
+        elif game_window_action == GameWindowAction.T_SPIN_DOUBLE:
+            sound = str(Path(__file__).parent / "sounds" / "schadenfreude_1.wav")
+            QSound.play(sound)
+
+            # DEBUG
+            print(f"sounds/schadenfreude_1.wav")
 
         # LEVEL UP
         elif game_window_action == GameWindowAction.LEVEL_UP:
@@ -343,8 +332,7 @@ class Game(QObject):
         self.sound_manager = SoundManager(self)
 
         # Connections
-        self.game_window_action[GameWindowAction].connect(self.sound_manager.on_game_window_action)
-        self.game_window_action[GameWindowAction, Tetromino, int, bool].connect(self.sound_manager.on_game_window_action)
+        self.game_window_action.connect(self.sound_manager.on_game_window_action)
         self.next_tetromino_updated.connect(self.main_window.on_next_tetromino_update)
         self.field_updated.connect(self.main_window.on_field_update)
         self.score_updated.connect(self.main_window.on_score_update)
@@ -486,7 +474,7 @@ class Game(QObject):
 
         if self.pause:
             if play_sound:
-                self.game_window_action.emit(GameWindowAction.PAUSE_ACTIVED)
+                self.game_window_action.emit(GameWindowAction.PAUSE_ACTIVATED)
 
             self.move_timer.stop()
             self.main_window.game_timer.stop()
@@ -681,12 +669,13 @@ class Game(QObject):
             if cnt_complete_lines == 1:
                 self.game_window_action.emit(GameWindowAction.SINGLE_LINE_CLEAR)
             elif cnt_complete_lines == 2:
-                self.game_window_action[GameWindowAction, Tetromino, int, bool].emit(
-                    GameWindowAction.DOUBLE_LINE_CLEAR,
-                    self.current_tetromino,
-                    self.current_tetromino_spin_matrix[self.playing_cursor[0]],
-                    self.has_minimum_required_t_spin_occupied_edges(),
-                )
+
+                if self.current_tetromino.tetromio_type == TetrominoType.T_BRICK \
+                        and self.current_tetromino_spin_matrix[self.playing_cursor[0]] > 0 \
+                        and self.has_minimum_required_t_spin_occupied_edges():
+                    self.game_window_action.emit(GameWindowAction.T_SPIN_DOUBLE)
+                else:
+                    self.game_window_action.emit(GameWindowAction.DOUBLE_LINE_CLEAR)
             elif cnt_complete_lines == 3:
                 self.game_window_action.emit(GameWindowAction.TRIPLE_LINE_CLEAR)
             else:
