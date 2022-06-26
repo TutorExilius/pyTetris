@@ -148,7 +148,11 @@ class Tetromino:
         t = TetrominoType.T_BRICK.value
 
         if self.rotation_index == 0:
-            return [[0, 0, 0], [t, t, t], [0, t, 0]]
+            return [
+                [0, 0, 0],
+                [t, t, t],
+                [0, t, 0]
+            ]
         elif self.rotation_index == 1:
             return [[0, t, 0], [t, t, 0], [0, t, 0]]
         elif self.rotation_index == 2:
@@ -175,12 +179,13 @@ class SoundManager(QObject):
         super(SoundManager, self).__init__(parent)
 
     @QtCore.pyqtSlot(GameWindowAction)
-    @QtCore.pyqtSlot(GameWindowAction, Tetromino, int)
+    @QtCore.pyqtSlot(GameWindowAction, Tetromino, int, bool)
     def on_game_window_action(
             self,
             game_window_action,
             current_tetromino=None,
             count_rotations=0,
+            has_minimum_3_occupied_edges=False,
     ):
         if game_window_action == GameWindowAction.ROTATION:
             rand_num = random.randrange(1, 8)  # currently 7 sounds available
@@ -242,7 +247,7 @@ class SoundManager(QObject):
 
         elif game_window_action == GameWindowAction.DOUBLE_LINE_CLEAR:
             if current_tetromino.tetromio_type == TetrominoType.T_BRICK \
-                    and current_tetromino.rotation_index == 0 \
+                    and has_minimum_3_occupied_edges \
                     and count_rotations > 0:
 
                 sound = str(Path(__file__).parent / "sounds" / "schadenfreude_1.wav")
@@ -306,7 +311,10 @@ class Game(QObject):
     lines_updated = pyqtSignal(int)
     stamped_tetromino = pyqtSignal()
     pre_clear = pyqtSignal(list)
-    game_window_action = pyqtSignal([GameWindowAction], [GameWindowAction, Tetromino, int])
+    game_window_action = pyqtSignal(
+        [GameWindowAction],
+        [GameWindowAction, Tetromino, int, bool],
+    )
 
     def __init__(self, height, width, main_window, start_level=0):
         QObject.__init__(self)
@@ -336,7 +344,7 @@ class Game(QObject):
 
         # Connections
         self.game_window_action[GameWindowAction].connect(self.sound_manager.on_game_window_action)
-        self.game_window_action[GameWindowAction, Tetromino, int].connect(self.sound_manager.on_game_window_action)
+        self.game_window_action[GameWindowAction, Tetromino, int, bool].connect(self.sound_manager.on_game_window_action)
         self.next_tetromino_updated.connect(self.main_window.on_next_tetromino_update)
         self.field_updated.connect(self.main_window.on_field_update)
         self.score_updated.connect(self.main_window.on_score_update)
@@ -603,6 +611,23 @@ class Game(QObject):
 
         return self.is_possible(self.playing_cursor, self.current_tetromino)
 
+    def has_minimum_required_t_spin_occupied_edges(self) -> bool:
+        """The requirement for a t-spin event is that minmum 3 fields of the T Brick edges are occupied.
+
+            If so, return true,
+            if not, retunr false.
+        """
+
+        h, w = self.playing_cursor
+        cnt_occupied_fields = [
+            bool(self.field[h][w]),
+            bool(self.field[h + 2][w]),
+            bool(self.field[h][w + 2]),
+            bool(self.field[h + 2][w + 2]),
+        ].count(True)
+
+        return cnt_occupied_fields >= 3
+
     def is_possible(self, pos, tetromino):
         future_cursor_h, future_cursor_w = pos
 
@@ -656,10 +681,11 @@ class Game(QObject):
             if cnt_complete_lines == 1:
                 self.game_window_action.emit(GameWindowAction.SINGLE_LINE_CLEAR)
             elif cnt_complete_lines == 2:
-                self.game_window_action[GameWindowAction, Tetromino, int].emit(
+                self.game_window_action[GameWindowAction, Tetromino, int, bool].emit(
                     GameWindowAction.DOUBLE_LINE_CLEAR,
                     self.current_tetromino,
                     self.current_tetromino_spin_matrix[self.playing_cursor[0]],
+                    self.has_minimum_required_t_spin_occupied_edges(),
                 )
             elif cnt_complete_lines == 3:
                 self.game_window_action.emit(GameWindowAction.TRIPLE_LINE_CLEAR)
