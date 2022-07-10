@@ -684,7 +684,6 @@ class Game(QObject):
             self.remove_complete_lines(complete_lines)
 
     def remove_complete_lines(self, complete_lines):
-        self.update_field()
         self.main_window.pre_clear_animation(complete_lines)
 
         new_field = [[0] * self.width for i in range(self.height)]

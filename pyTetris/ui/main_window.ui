@@ -11,7 +11,7 @@
             </rect>
         </property>
         <property name="windowTitle">
-            <string>pyTetris 2020 - v1.2.3</string>
+            <string>pyTetris 2020 - v1.2.4</string>
         </property>
         <widget class="QWidget" name="centralwidget">
             <property name="minimumSize">
